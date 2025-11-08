@@ -3,143 +3,245 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>جنازه — هوومن و یانگ سادن</title>
-  <meta name="description" content="ترک جدید از هوومن و یانگ سادن" />
+  <title>جنازه — Visualizer</title>
+  <meta name="description" content="موزیک پلیر با نمایش موج صوتی حرفه‌ای" />
   <style>
     :root{
-      --bg:#0b0b0d; --card:#111216; --muted:#bdbdbd; --accent:#0aa;
-      --text:#f3f3f3; --radius:14px;
+      --bg:#07070a; --card:#0f1114; --muted:#bdbdbd; --accent:#18b0ff;
+      --glass: rgba(255,255,255,0.03);
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family: "Vazirmatn", "Segoe UI", Tahoma, Arial, sans-serif;direction:rtl}
-    .wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;box-sizing:border-box}
-    .card{width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.6);text-align:center}
-    .cover{width:100%;height:calc(100vw * 0.6);max-height:620px;object-fit:cover;display:block}
-    @media(min-width:700px){ .cover{height:420px} }
-    .meta{padding:18px}
-    h1{margin:0 0 8px 0;font-size:1.45rem;line-height:1.1}
-    p{margin:0;color:var(--muted);font-size:1rem}
-    .controls{display:flex;gap:12px;justify-content:center;align-items:center;padding:16px;flex-wrap:wrap}
-    .btn{
-      background:var(--accent);color:#fff;border:0;padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(10,170,170,.12);
+    html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family: Vazirmatn, "Segoe UI", Tahoma, Arial, sans-serif;direction:rtl}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box}
+    .card{width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.6);text-align:center}
+    .cover{width:100%;height:auto;display:block;object-fit:cover}
+    .meta{padding:14px}
+    h1{margin:0 0 8px 0;font-size:1.4rem}
+    p{margin:0;color:var(--muted)}
+    .controls{display:flex;gap:12px;justify-content:center;align-items:center;padding:12px;flex-wrap:wrap}
+    .btn{background:var(--accent);color:#001; border:0;padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(24,176,255,.12)}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.06);color:var(--muted)}
+    footer{padding:12px;color:var(--muted);font-size:.9rem}
+    /* visualizer container */
+    .viz-wrap{position:relative;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:10px}
+    canvas{width:100%;height:140px;display:block;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.08));}
+    @media(min-width:800px){ canvas{height:200px} }
+    /* subtle glowing effect */
+    .glow {
+      position:absolute;inset:0;pointer-events:none;
+      background:radial-gradient(circle at 50% 20%, rgba(24,176,255,0.06), transparent 18%),
+                 radial-gradient(circle at 50% 80%, rgba(24,176,255,0.03), transparent 25%);
+      mix-blend-mode:screen;border-radius:10px;
     }
-    .small{color:var(--muted);font-size:.9rem;margin-top:8px}
-    .visually-hidden{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
-    .play-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.45));backdrop-filter:blur(2px);z-index:60;padding:20px}
-    .overlay-card{background:rgba(17,17,18,.96);padding:18px;border-radius:12px;text-align:center;max-width:420px;width:100%}
-    .muted-note{color:var(--muted);font-size:0.95rem;margin-top:10px}
-    footer{margin-top:18px;color:var(--muted);font-size:.9rem;padding-bottom:18px}
-    /* small visual improvements */
-    a.link{color:var(--accent);text-decoration:none;font-weight:600}
+    /* small helpful hint */
+    .hint{font-size:.95rem;color:var(--muted);margin-top:8px}
   </style>
 </head>
 <body>
   <div class="wrap" role="main">
-    <div class="card">
-      <img id="coverImg" class="cover" src="" alt="کاور آهنگ جنازه">
+    <div class="card" style="max-width:820px">
+      <img id="coverImg" class="cover" src="images (2).jpeg" alt="کاور آهنگ جنازه">
       <div class="meta">
         <h1 id="title">جنازه</h1>
         <p id="desc">ترک جدید از هوومن و یانگ سادن</p>
       </div>
 
-      <div class="controls" role="region" aria-label="کنترل پخش">
-        <button id="playToggle" class="btn">پخش</button>
-        <button id="pauseBtn" class="btn" style="display:none;background:#555">توقف</button>
+      <div class="viz-wrap" style="margin:0 12px 12px 12px;">
+        <canvas id="vizCanvas" aria-hidden="false"></canvas>
+        <div class="glow" aria-hidden="true"></div>
+        <div class="hint" style="text-align:center">نمایشگر صوتی — برای شروع پخش، دکمه پخش را لمس کن</div>
       </div>
-    </div>
 
-    <footer>آهنگ را در دستگاه خود گوش کنید. در برخی مرورگرها لمس لازم است.</footer>
-  </div>
-
-  <!-- audio بدون src اولیه؛ با JS مقداردهی می‌شود تا مشکلات نام فایل حاوی فاصله و علامت & رفع شود -->
-  <audio id="player" preload="auto" playsinline></audio>
-
-  <!-- overlay برای زمانی که autoplay مسدود شود -->
-  <div id="overlay" class="play-overlay" style="display:none" aria-hidden="true">
-    <div class="overlay-card">
-      <div style="font-size:1.15rem;font-weight:700">برای شروع پخش لمس کنید</div>
-      <div style="margin-top:12px">
-        <button id="overlayPlay" class="btn" style="padding:12px 20px">پخش</button>
+      <div class="controls">
+        <button id="playBtn" class="btn">پخش</button>
+        <button id="pauseBtn" class="btn ghost" style="display:none">توقف</button>
+        <a id="downloadLink" class="btn ghost" href="#" download style="display:none">دانلود آهنگ</a>
       </div>
-      <div class="muted-note">اگر پس از لمس پخش نشد، دکمه پخش را دوباره فشار دهید.</div>
+
+      <footer>در صورت مسدود شدن پخش خودکار، صفحه را لمس کنید یا دکمه پخش را فشار دهید.</footer>
     </div>
   </div>
+
+  <!-- audio را بدون autoplay نگه می‌داریم؛ JS مقداردهی می‌کند -->
+  <audio id="player" preload="auto" playsinline src="08.Hoomaan & Arown & Young Sudden - Jenaaze (128).mp3"></audio>
 
   <script>
-    // نام دقیق فایل‌ها (همان‌هایی که در مخزن آپلود کردی)
-    const coverFile = 'images (2).jpeg';
+    // تنظیمات فایل (در صورت تغییر نام فایل‌ها، اینجا را عوض کن)
     const audioFile = '08.Hoomaan & Arown & Young Sudden - Jenaaze (128).mp3';
+    const coverFile = 'images (2).jpeg';
 
-    // المان‌ها
+    // عناصر صفحه
     const player = document.getElementById('player');
     const coverImg = document.getElementById('coverImg');
-    const playToggle = document.getElementById('playToggle');
+    const playBtn = document.getElementById('playBtn');
     const pauseBtn = document.getElementById('pauseBtn');
-    const overlay = document.getElementById('overlay');
-    const overlayPlay = document.getElementById('overlayPlay');
+    const downloadLink = document.getElementById('downloadLink');
+    const canvas = document.getElementById('vizCanvas');
+    const ctx = canvas.getContext('2d');
 
-    // به دلیل وجود فاصله و کاراکترهای خاص در نام فایل‌ها، از encodeURI استفاده می‌کنیم
-    const coverURL = encodeURI(coverFile);
-    const audioURL = encodeURI(audioFile);
+    // قرار دادن منابع (encodeURI برای اسم‌هایی با فاصله/کاراکتر)
+    player.src = encodeURI(audioFile);
+    coverImg.src = encodeURI(coverFile);
+    downloadLink.href = encodeURI(audioFile);
+    downloadLink.style.display = 'inline-block';
 
-    // مقداردهی به المان‌ها
-    coverImg.src = coverURL;
-    player.src = audioURL;
+    // اندازه‌گذاری canvas برای رزولوشن بالا (دستگاه‌های با DPR زیاد)
+    function resizeCanvas() {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    // تلاش برای پخش خودکار پس از بارگذاری
-    window.addEventListener('load', async () => {
-      try {
-        await player.play();
-        // اگر پخش موفق بود، دکمه‌ها را تنظیم کن
-        playToggle.style.display = 'none';
-        pauseBtn.style.display = 'inline-block';
-      } catch (err) {
-        // autoplay مسدود شده؛ overlay را نشان بده تا کاربر لمس کند
-        overlay.style.display = 'flex';
-        overlay.setAttribute('aria-hidden', 'false');
+    // Web Audio API setup
+    let audioCtx, analyser, sourceNode, dataArray, freqArray;
+    const FFT_SIZE = 2048; // کیفیت آنالیز؛ می‌توان کمتر کرد برای موبایل قدیمی
+    const SMOOTHING = 0.85;
+
+    function setupAudioNodes() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = FFT_SIZE;
+      analyser.smoothingTimeConstant = SMOOTHING;
+      sourceNode = audioCtx.createMediaElementSource(player);
+      sourceNode.connect(analyser);
+      analyser.connect(audioCtx.destination);
+
+      const bufferLength = analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+      freqArray = new Uint8Array(bufferLength);
+    }
+
+    // رسمگر حرفه‌ای: ترکیبی از wave + gradient bars
+    function drawVisualizer() {
+      if (!analyser) return;
+      requestAnimationFrame(drawVisualizer);
+
+      const w = canvas.width / (window.devicePixelRatio || 1);
+      const h = canvas.height / (window.devicePixelRatio || 1);
+      ctx.clearRect(0,0,w,h);
+
+      // دریافت داده‌ها
+      analyser.getByteTimeDomainData(dataArray);
+      analyser.getByteFrequencyData(freqArray);
+
+      // پس‌زمینه نرم
+      ctx.fillStyle = 'rgba(5,8,12,0.28)';
+      ctx.fillRect(0,0,w,h);
+
+      // موج (time domain) — center line
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = 'rgba(24,176,255,0.95)';
+      ctx.beginPath();
+      const sliceWidth = w / dataArray.length;
+      let x = 0;
+      for (let i=0;i<dataArray.length;i++) {
+        const v = dataArray[i] / 128.0; // 0..2
+        const y = v * (h/2) * 0.9;
+        const py = y;
+        if (i === 0) ctx.moveTo(x, py + (h/2));
+        else ctx.lineTo(x, py + (h/2));
+        x += sliceWidth;
       }
-    });
+      ctx.stroke();
 
-    // کنترل دکمه‌های اصلی
-    playToggle.addEventListener('click', async () => {
+      // bars based on frequency with soft glow
+      const barCount = Math.min(64, Math.floor(w / 6));
+      const gap = Math.max(2, Math.floor(w / (barCount * 18)));
+      const barWidth = (w - gap*(barCount-1)) / barCount;
+      const baseY = h * 0.9;
+
+      // gradient for bars
+      const grad = ctx.createLinearGradient(0,0,0,h);
+      grad.addColorStop(0, 'rgba(24,176,255,0.95)');
+      grad.addColorStop(0.5, 'rgba(24,176,255,0.45)');
+      grad.addColorStop(1, 'rgba(24,176,255,0.12)');
+
+      for (let i=0;i<barCount;i++){
+        const idx = Math.floor(i * freqArray.length / barCount);
+        const v = freqArray[idx] / 255; // 0..1
+        const barH = Math.max(2, v * h * 0.7);
+        const bx = i * (barWidth + gap);
+        const by = baseY - barH;
+
+        // shadow/glow
+        ctx.fillStyle = grad;
+        ctx.fillRect(bx, by, barWidth, barH);
+
+        // subtle top highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        ctx.fillRect(bx, by, barWidth, Math.min(6, barH));
+      }
+
+      // center glow based on average volume
+      let sum = 0;
+      for (let i=0;i<freqArray.length;i++) sum += freqArray[i];
+      const avg = sum / freqArray.length;
+      const glowRadius = Math.min(h * 0.6, (avg/255) * h * 1.2);
+      const g = ctx.createRadialGradient(w/2, h*0.45, 0, w/2, h*0.45, glowRadius);
+      g.addColorStop(0, 'rgba(24,176,255,0.12)');
+      g.addColorStop(1, 'rgba(24,176,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,w,h);
+    }
+
+    // دکمه‌ها و رفتار پخش
+    playBtn.addEventListener('click', async () => {
       try {
+        setupAudioNodes();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
         await player.play();
-        playToggle.style.display = 'none';
+        playBtn.style.display = 'none';
         pauseBtn.style.display = 'inline-block';
-        overlay.style.display = 'none';
-        overlay.setAttribute('aria-hidden', 'true');
-      } catch(e) {
-        // اگر پخش نشد، overlay را نشان بده
-        overlay.style.display = 'flex';
+        drawVisualizer();
+      } catch (e) {
+        // برخی مرورگرها نیاز به تعامل بیشتر دارند
+        console.warn('play failed', e);
       }
     });
 
     pauseBtn.addEventListener('click', () => {
       player.pause();
       pauseBtn.style.display = 'none';
-      playToggle.style.display = 'inline-block';
-      // اجازه بده کاربر دوباره پخش کند
+      playBtn.style.display = 'inline-block';
     });
 
-    // overlay play
-    overlayPlay.addEventListener('click', async () => {
+    // تلاش خودکار اولیه (ممکن است مسدود شود؛ در این صورت دکمه مشخص است)
+    window.addEventListener('load', async () => {
       try {
+        setupAudioNodes();
         await player.play();
-        overlay.style.display = 'none';
-        overlay.setAttribute('aria-hidden', 'true');
-        playToggle.style.display = 'none';
+        playBtn.style.display = 'none';
         pauseBtn.style.display = 'inline-block';
-      } catch (e) {
-        alert('پخش آغاز نشد. لطفاً دوباره تلاش کنید.');
+        drawVisualizer();
+      } catch (_) {
+        // autoplay blocked — کاربر باید لمس کند
       }
     });
 
-    // اگر کاربر در صفحه کلیک کند، یک تلاش دیگر برای پخش انجام بده (برای موبایل)
-    document.body.addEventListener('click', async function once(){
-      if (!player.paused) return;
-      try { await player.play(); overlay.style.display = 'none'; playToggle.style.display = 'none'; pauseBtn.style.display = 'inline-block'; }
-      catch(_) {}
-      document.body.removeEventListener('click', once);
-    }, {capture:true, passive:true});
+    // برای ایمن بودن، اگر کاربر صفحه را لمس کند، یکبار تلاش کنیم
+    function userTouchStart() {
+      if (!audioCtx) {
+        try {
+          setupAudioNodes();
+          audioCtx.resume && audioCtx.resume();
+        } catch {}
+      }
+      document.body.removeEventListener('touchstart', userTouchStart);
+    }
+    document.body.addEventListener('touchstart', userTouchStart, {passive:true});
+
+    // در صورت اتمام آهنگ، دکمه‌ها را بازنشانی کن
+    player.addEventListener('ended', () => {
+      pauseBtn.style.display = 'none';
+      playBtn.style.display = 'inline-block';
+    });
+
+    // اندازه canvas هنگام بارگذاری کامل
+    window.addEventListener('load', resizeCanvas);
   </script>
 </body>
 </html>
