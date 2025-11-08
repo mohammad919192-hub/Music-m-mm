@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>جنازه — هوومن و یانگ سادن</title>
+  <meta name="description" content="ترک جدید از هوومن و یانگ سادن" />
+  <style>
+    :root{
+      --bg:#0b0b0d; --card:#111216; --muted:#bdbdbd; --accent:#0aa;
+      --text:#f3f3f3; --radius:14px;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family: "Vazirmatn", "Segoe UI", Tahoma, Arial, sans-serif;direction:rtl}
+    .wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;box-sizing:border-box}
+    .card{width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.6);text-align:center}
+    .cover{width:100%;height:calc(100vw * 0.6);max-height:620px;object-fit:cover;display:block}
+    @media(min-width:700px){ .cover{height:420px} }
+    .meta{padding:18px}
+    h1{margin:0 0 8px 0;font-size:1.45rem;line-height:1.1}
+    p{margin:0;color:var(--muted);font-size:1rem}
+    .controls{display:flex;gap:12px;justify-content:center;align-items:center;padding:16px;flex-wrap:wrap}
+    .btn{
+      background:var(--accent);color:#fff;border:0;padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(10,170,170,.12);
+    }
+    .small{color:var(--muted);font-size:.9rem;margin-top:8px}
+    .visually-hidden{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .play-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.45));backdrop-filter:blur(2px);z-index:60;padding:20px}
+    .overlay-card{background:rgba(17,17,18,.96);padding:18px;border-radius:12px;text-align:center;max-width:420px;width:100%}
+    .muted-note{color:var(--muted);font-size:0.95rem;margin-top:10px}
+    footer{margin-top:18px;color:var(--muted);font-size:.9rem;padding-bottom:18px}
+    /* small visual improvements */
+    a.link{color:var(--accent);text-decoration:none;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main">
+    <div class="card">
+      <img id="coverImg" class="cover" src="" alt="کاور آهنگ جنازه">
+      <div class="meta">
+        <h1 id="title">جنازه</h1>
+        <p id="desc">ترک جدید از هوومن و یانگ سادن</p>
+      </div>
+
+      <div class="controls" role="region" aria-label="کنترل پخش">
+        <button id="playToggle" class="btn">پخش</button>
+        <button id="pauseBtn" class="btn" style="display:none;background:#555">توقف</button>
+      </div>
+    </div>
+
+    <footer>آهنگ را در دستگاه خود گوش کنید. در برخی مرورگرها لمس لازم است.</footer>
+  </div>
+
+  <!-- audio بدون src اولیه؛ با JS مقداردهی می‌شود تا مشکلات نام فایل حاوی فاصله و علامت & رفع شود -->
+  <audio id="player" preload="auto" playsinline></audio>
+
+  <!-- overlay برای زمانی که autoplay مسدود شود -->
+  <div id="overlay" class="play-overlay" style="display:none" aria-hidden="true">
+    <div class="overlay-card">
+      <div style="font-size:1.15rem;font-weight:700">برای شروع پخش لمس کنید</div>
+      <div style="margin-top:12px">
+        <button id="overlayPlay" class="btn" style="padding:12px 20px">پخش</button>
+      </div>
+      <div class="muted-note">اگر پس از لمس پخش نشد، دکمه پخش را دوباره فشار دهید.</div>
+    </div>
+  </div>
+
+  <script>
+    // نام دقیق فایل‌ها (همان‌هایی که در مخزن آپلود کردی)
+    const coverFile = 'images (2).jpeg';
+    const audioFile = '08.Hoomaan & Arown & Young Sudden - Jenaaze (128).mp3';
+
+    // المان‌ها
+    const player = document.getElementById('player');
+    const coverImg = document.getElementById('coverImg');
+    const playToggle = document.getElementById('playToggle');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const overlay = document.getElementById('overlay');
+    const overlayPlay = document.getElementById('overlayPlay');
+
+    // به دلیل وجود فاصله و کاراکترهای خاص در نام فایل‌ها، از encodeURI استفاده می‌کنیم
+    const coverURL = encodeURI(coverFile);
+    const audioURL = encodeURI(audioFile);
+
+    // مقداردهی به المان‌ها
+    coverImg.src = coverURL;
+    player.src = audioURL;
+
+    // تلاش برای پخش خودکار پس از بارگذاری
+    window.addEventListener('load', async () => {
+      try {
+        await player.play();
+        // اگر پخش موفق بود، دکمه‌ها را تنظیم کن
+        playToggle.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+      } catch (err) {
+        // autoplay مسدود شده؛ overlay را نشان بده تا کاربر لمس کند
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+      }
+    });
+
+    // کنترل دکمه‌های اصلی
+    playToggle.addEventListener('click', async () => {
+      try {
+        await player.play();
+        playToggle.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+      } catch(e) {
+        // اگر پخش نشد، overlay را نشان بده
+        overlay.style.display = 'flex';
+      }
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      player.pause();
+      pauseBtn.style.display = 'none';
+      playToggle.style.display = 'inline-block';
+      // اجازه بده کاربر دوباره پخش کند
+    });
+
+    // overlay play
+    overlayPlay.addEventListener('click', async () => {
+      try {
+        await player.play();
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        playToggle.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+      } catch (e) {
+        alert('پخش آغاز نشد. لطفاً دوباره تلاش کنید.');
+      }
+    });
+
+    // اگر کاربر در صفحه کلیک کند، یک تلاش دیگر برای پخش انجام بده (برای موبایل)
+    document.body.addEventListener('click', async function once(){
+      if (!player.paused) return;
+      try { await player.play(); overlay.style.display = 'none'; playToggle.style.display = 'none'; pauseBtn.style.display = 'inline-block'; }
+      catch(_) {}
+      document.body.removeEventListener('click', once);
+    }, {capture:true, passive:true});
+  </script>
+</body>
+</html>
