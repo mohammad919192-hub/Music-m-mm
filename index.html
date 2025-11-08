@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>آهنگ جدید</title>
+  <style>
+    :root{--bg:#0b0b0b;--card:#0f0f0f;--text:#efefef;--muted:#bdbdbd;}
+    html,body{height:100%;margin:0;background:var(--bg);font-family: "Segoe UI", Tahoma, "Helvetica Neue", Arial, sans-serif;direction:rtl}
+    .wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+    .card{width:100%;max-width:760px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.6);text-align:center}
+    .cover{width:100%;height:calc(100vw * 0.6);max-height:560px;object-fit:cover;display:block}
+    @media(min-width:600px){ .cover{height:420px} }
+    .meta{padding:18px}
+    h1{margin:0 0 8px 0;font-size:1.35rem;color:var(--text)}
+    p{margin:0;color:var(--muted);font-size:1rem}
+    .visually-hidden{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .play-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.45));backdrop-filter:blur(2px);z-index:30}
+    .play-btn{background:#06a; color:#fff;border:none;padding:14px 22px;border-radius:999px;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.6)}
+    .small-note{margin-top:10px;color:#cfcfcf;font-size:.9rem}
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main">
+    <div class="card">
+      <img class="cover" id="coverImg" src="cover.jpg" alt="کاور آهنگ">
+      <div class="meta">
+        <h1 id="title">آهنگ جدید از هنرمند ما</h1>
+        <p id="desc">یک خط متن کوتاه یا توضیح درباره آهنگ</p>
+      </div>
+    </div>
+  </div>
+
+  <audio id="player" preload="auto" src="song.mp3" playsinline></audio>
+
+  <div id="overlay" class="play-overlay visually-hidden" aria-hidden="true">
+    <div style="text-align:center">
+      <button id="playBtn" class="play-btn">پخش</button>
+      <div class="small-note">در بعضی مرورگرها پخش خودکار مسدود است — لمس کنید تا پخش شود</div>
+    </div>
+  </div>
