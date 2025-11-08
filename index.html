@@ -3,425 +3,274 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>جنازه — تجربه صوتی تعجب‌آور</title>
-<meta name="description" content="موزیک پلیر حرفه‌ای با ویژوالایزر، افکت‌های بیس، پارالاکس، لیریکس و امکانات فراوان" />
+<title>جنازه — تجربه سه‌بعدی و ویژوالایزر</title>
+<meta name="description" content="پلیر پیشرفته با ویژوالایزر، افکت سه‌بعدی، لیریکس و کنترل کامل" />
 <style>
-/* ===========================
-   پایه و متغیرهای تم
-   =========================== */
-:root{
-  --bg-1:#07080a; --bg-2:#0f1114; --card:#0c0d10; --muted:#aeb3b8;
-  --accent:#14b8ff; --accent-2:#9b59ff; --glass:rgba(255,255,255,0.03);
-  --success:#22c55e; --danger:#ff4d6d;
-  --radius:14px;
-  --transition:300ms cubic-bezier(.2,.8,.2,1);
-}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-1),var(--bg-2));color:#fff;font-family: Vazirmatn, "Segoe UI", Roboto, Arial, sans-serif;direction:rtl;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
+  :root{
+    --bg1:#071018; --bg2:#0b1020; --card:#0f1624; --muted:#aeb3b8;
+    --accent:#18b0ff; --accent2:#8b5cf6; --glass:rgba(255,255,255,0.03);
+    --radius:14px; --trans:300ms cubic-bezier(.2,.8,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Vazirmatn,Segoe UI,Roboto,Arial,sans-serif;color:#fff;background:linear-gradient(180deg,var(--bg1),var(--bg2));direction:rtl;overflow-x:hidden}
+  .wrap{min-height:100vh;padding:28px;display:flex;align-items:center;justify-content:center}
+  .stage{width:100%;max-width:1120px;transform-style:preserve-3d;perspective:1200px;}
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:16px;padding:16px;display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start;box-shadow:0 30px 80px rgba(2,8,20,.7);
+    transform-style:preserve-3d;backface-visibility:hidden;position:relative;overflow:visible;
+  }
 
-/* ===========================
-   ساختار اصلی
-   =========================== */
-.app{
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:28px 18px 80px;
-  gap:20px;
-}
-.header{
-  width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;gap:12px;
-}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{
-  width:56px;height:56px;border-radius:12px;overflow:hidden;flex:0 0 56px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#001;
-  box-shadow:0 6px 22px rgba(20,184,255,0.08), inset 0 -6px 18px rgba(0,0,0,0.25);
-}
-.title{
-  font-size:1.05rem;font-weight:700;letter-spacing:.2px;
-}
-.controls-top{display:flex;gap:8px;align-items:center}
+  /* cover 3D container */
+  .cover-3d{width:100%;height:100%;display:block;transform-style:preserve-3d;will-change:transform}
+  .cover{
+    width:100%;border-radius:12px;display:block;object-fit:cover;box-shadow:0 20px 50px rgba(2,8,20,.6);
+    transform-origin:center center;transition:transform 350ms ease, box-shadow 350ms ease;
+  }
+  .cover-reflection{
+    position:absolute;left:12px;right:12px;bottom:12px;height:60px;border-radius:10px;filter:blur(30px) saturate(110%);opacity:.12;background-size:cover;background-position:center;z-index:-1;
+  }
 
-/* ===========================
-   کارت پلیر
-   =========================== */
-.player{
-  width:100%;max-width:1100px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-radius:18px;padding:16px;display:grid;grid-template-columns: 320px 1fr;gap:18px;align-items:center;box-shadow:0 18px 50px rgba(0,0,0,.6);
-  position:relative;overflow:visible;
-}
+  /* metadata and controls */
+  .meta h1{margin:10px 0 6px;font-size:1.6rem;letter-spacing:.2px}
+  .meta p{margin:0;color:var(--muted)}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#001;border:0;padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 12px 40px rgba(24,176,255,0.08)}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
 
-/* پارالاکس کاور */
-.cover-wrap{position:relative;overflow:visible;border-radius:14px;transform-origin:center center}
-.cover{
-  width:100%;height:100%;max-height:420px;object-fit:cover;border-radius:12px;display:block;transform-origin:center center;box-shadow:0 20px 40px rgba(0,0,0,.45)
-}
-.cover-ghost{
-  position:absolute;inset:8px;border-radius:12px;filter:blur(28px) saturate(120%);opacity:.18;z-index:-1;background-size:cover;background-position:center}
+  /* viz */
+  .viz{grid-column:1/-1;border-radius:12px;overflow:hidden;padding:8px;position:relative;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));}
+  .canvas-wrap{border-radius:10px;overflow:hidden;padding:8px}
+  canvas#viz{width:100%;height:180px;display:block}
 
-/* متادیتا */
-.meta{padding:8px 2px}
-h1{margin:8px 0 6px 0;font-size:1.6rem;line-height:1.02}
-.desc{color:var(--muted);margin:0 0 8px 0;font-size:0.98rem}
+  /* 3D depth layers */
+  .depth-layer{
+    position:absolute;inset:0;border-radius:12px;pointer-events:none;mix-blend-mode:screen;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(24,176,255,0.06), transparent 10%),
+      radial-gradient(circle at 80% 80%, rgba(139,92,246,0.04), transparent 15%);
+    z-index:2;
+  }
 
-/* دکمه ها */
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.btn{
-  background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#001;border:0;padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer;transition:transform 180ms ease, box-shadow var(--transition);
-  box-shadow:0 10px 30px rgba(20,184,255,0.08);
-}
-.btn.ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);box-shadow:none}
-.small{font-size:0.88rem;color:var(--muted)}
-.icon{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03)}
+  /* lyrics */
+  .lyrics-box{max-height:220px;overflow:auto;padding:12px;border-radius:10px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02);color:var(--muted);line-height:1.6}
+  .lyrics-box .line{padding:6px 0}
 
-/* ===========================
-   ویژوالایزر و canvas
-   =========================== */
-.viz{
-  grid-column:1/-1;padding:6px;border-radius:12px;position:relative;margin-top:8px;
-}
-.canvas-wrap{position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:10px}
-canvas#viz{width:100%;height:180px;border-radius:10px;display:block}
-/* glow overlay */
-.glow-layer{position:absolute;inset:8px;border-radius:10px;pointer-events:none;background:
-  radial-gradient(circle at 50% 20%, rgba(20,184,255,0.06), transparent 12%),
-  radial-gradient(circle at 85% 70%, rgba(155,89,255,0.04), transparent 18%);mix-blend-mode:screen;}
+  /* 3D hover subtle tilt for desktop */
+  @media(min-width:900px){
+    .card:hover .cover{transform:translateZ(24px) rotateX(3deg) rotateY(-2deg);box-shadow:0 40px 90px rgba(2,8,20,.75)}
+    .card:hover .meta{transform:translateZ(18px)}
+  }
 
-/* ===========================
-   لیریکس (متن آهنگ)
-   =========================== */
-.lyrics{
-  max-height:180px;overflow:auto;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02);
-  color:var(--muted);font-size:0.98rem;line-height:1.6;
-}
+  /* responsive */
+  @media(max-width:920px){
+    .card{grid-template-columns:1fr;padding:14px}
+    canvas#viz{height:140px}
+  }
+  @media(max-width:420px){
+    canvas#viz{height:110px}
+    .meta h1{font-size:1.2rem}
+  }
 
-/* ===========================
-   منوی کناری و لیست آهنگ‌ها
-   =========================== */
-.sidebar{
-  width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;
-}
-.playlist{display:flex;flex-direction:column;gap:8px}
-.track{
-  display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;background:rgba(255,255,255,0.015);cursor:pointer;transition:background var(--transition);
-}
-.track:hover{background:rgba(255,255,255,0.02)}
-.track .tmeta{font-size:0.95rem}
-.track .tname{font-weight:700}
-.track .tartist{color:var(--muted);font-size:0.9rem}
-
-/* ===========================
-   افکت لرزش و نور (کلاس‌ها)
-   =========================== */
-.shake{animation: shakeAnim 120ms linear infinite}
-@keyframes shakeAnim{
-  0%{transform:translateY(0) rotate(0)}
-  25%{transform:translateY(-2px) rotate(-0.6deg)}
-  50%{transform:translateY(0) rotate(0)}
-  75%{transform:translateY(2px) rotate(0.6deg)}
-  100%{transform:translateY(0) rotate(0)}
-}
-/* پالس نور با شدت */
-.pulse{
-  animation: pulseGlow 600ms ease-in-out infinite;
-}
-@keyframes pulseGlow{
-  0%{box-shadow:0 10px 40px rgba(20,184,255,0.04)}
-  50%{box-shadow:0 20px 70px rgba(20,184,255,0.14)}
-  100%{box-shadow:0 10px 40px rgba(20,184,255,0.04)}
-}
-
-/* ===========================
-   تم تاریک/روشن
-   =========================== */
-.theme-toggle{display:inline-flex;gap:8px;align-items:center}
-.light-mode{
-  --bg-1:#f7fbff;--bg-2:#eef6ff;--card:#ffffff;--muted:#374151;--accent:#ffb643;--accent-2:#ff6b81;color:#001;
-}
-.light-mode body{color:#001}
-
-/* ===========================
-   QR و اشتراک‌گذاری
-   =========================== */
-.qr-card{display:flex;gap:8px;align-items:center;padding:8px;border-radius:10px;background:rgba(255,255,255,0.02)}
-.qr-canvas{width:84px;height:84px;border-radius:8px;background:#fff}
-
-/* ===========================
-   ریسپانسیو
-   =========================== */
-@media (max-width:980px){
-  .player{grid-template-columns:1fr; padding:14px}
-  .sidebar{order:2;width:100%;max-width:100%}
-  .cover{max-height:320px}
-  canvas#viz{height:120px}
-}
-@media (max-width:420px){
-  h1{font-size:1.2rem}
-  .logo{width:46px;height:46px;font-size:15px}
-  canvas#viz{height:100px}
-}
+  /* small helpers */
+  .row{display:flex;gap:8px;align-items:center}
+  .small{font-size:.92rem;color:var(--muted)}
+  .pill{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:.9rem}
+  .hidden{display:none}
 </style>
 </head>
 <body>
-<div class="app" id="app">
-
-  <!-- هدر -->
-  <header class="header" role="banner">
-    <div class="brand">
-      <div class="logo">M</div>
-      <div>
-        <div class="title">جنازه</div>
-        <div class="small">ترک جدید از هوومن و یانگ سادن</div>
-      </div>
-    </div>
-
-    <div class="controls-top">
-      <div class="theme-toggle" title="تغییر تم">
-        <button id="themeBtn" class="btn ghost">تم</button>
-      </div>
-      <div class="small">حجم: <span id="volLabel">100%</span></div>
-    </div>
-  </header>
-
-  <!-- کارت پلیر -->
-  <main class="player" role="main" aria-label="پلیر موزیک">
-    <!-- سمت چپ: کاور و لیریکس -->
-    <aside class="sidebar" aria-label="کنترل‌ها و لیست">
-      <div class="cover-wrap">
-        <div class="cover-ghost" id="coverGhost"></div>
-        <img id="coverImg" class="cover" src="images (2).jpeg" alt="کاور جنازه">
-      </div>
-
-      <div class="row" style="margin-top:10px;justify-content:space-between">
-        <div class="row">
-          <button id="playBtn" class="btn">پخش</button>
-          <button id="pauseBtn" class="btn ghost" style="display:none">توقف</button>
-        </div>
-        <div class="row">
-          <button id="prevBtn" class="btn ghost">قبلی</button>
-          <button id="nextBtn" class="btn ghost">بعدی</button>
-        </div>
-      </div>
-
-      <div style="margin-top:10px" class="qr-card">
-        <canvas id="qrCanvas" class="qr-canvas"></canvas>
-        <div>
-          <div class="small">اسکن کن یا اشتراک بذار</div>
-          <div style="margin-top:6px" class="row">
-            <button id="shareBtn" class="btn ghost">اشتراک</button>
-            <button id="downloadBtn" class="btn ghost">دانلود</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top:12px">
-        <div class="small">لیست آهنگ‌ها</div>
-        <div class="playlist" id="playlist">
-          <!-- نمونه آیتم -->
-          <div class="track" data-src="08.Hoomaan & Arown & Young Sudden - Jenaaze (128).mp3">
-            <div style="width:46px;height:46px;border-radius:8px;overflow:hidden;background:url('images (2).jpeg') center/cover"></div>
-            <div class="tmeta">
-              <div class="tname">جنازه</div>
-              <div class="tartist">هوومن · یانگ سادن</div>
+  <div class="wrap">
+    <div class="stage">
+      <div class="card" id="card">
+        <!-- left: cover & controls -->
+        <aside style="display:flex;flex-direction:column;gap:12px">
+          <div style="position:relative">
+            <div class="cover-3d" id="cover3d">
+              <img id="cover" class="cover" src="images (2).jpeg" alt="کاور جنازه">
+              <div id="coverRef" class="cover-reflection" style="background-image:url('images (2).jpeg')"></div>
+            </div>
+            <div style="position:absolute;right:12px;top:12px">
+              <div class="pill small">حجم: <span id="volLabel">100%</span></div>
             </div>
           </div>
-        </div>
-      </div>
-    </aside>
 
-    <!-- سمت راست: متا، ویژوالایزر، لیریکس -->
-    <section>
-      <div class="meta">
-        <h1 id="songTitle">جنازه</h1>
-        <p class="desc" id="songDesc">ترک جدید از هوومن و یانگ سادن</p>
-      </div>
+          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+            <div style="flex:1">
+              <button id="playBtn" class="btn">پخش</button>
+              <button id="pauseBtn" class="btn ghost hidden">توقف</button>
+            </div>
+            <div style="text-align:left">
+              <button id="downloadBtn" class="btn ghost">دانلود</button>
+            </div>
+          </div>
 
-      <div class="viz" aria-hidden="false">
-        <div class="canvas-wrap">
-          <canvas id="viz"></canvas>
-          <div class="glow-layer" aria-hidden="true"></div>
-        </div>
-        <div class="row" style="margin-top:10px;justify-content:space-between;align-items:center">
-          <div class="small">ویژوالایزر حرفه‌ای | تأثیر بیس، لرزش و نور</div>
           <div>
-            <label class="small" style="margin-left:8px">مکس</label>
-            <input id="sensitivity" type="range" min="1" max="8" value="3" step="0.1" />
+            <div class="small" style="margin-bottom:6px">لیست آهنگ‌ها</div>
+            <div id="playlist" class="row" style="flex-direction:column;align-items:stretch;gap:8px">
+              <div class="pill" style="display:flex;align-items:center;gap:8px">
+                <div style="width:42px;height:42px;border-radius:8px;background-image:url('images (2).jpeg');background-size:cover"></div>
+                <div style="flex:1;text-align:right">
+                  <div style="font-weight:700">جنازه</div>
+                  <div class="small">هوومن · یانگ سادن</div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </aside>
+
+        <!-- right: meta, viz, lyrics -->
+        <main>
+          <div class="meta">
+            <h1 id="title">جنازه</h1>
+            <p id="desc" class="small">ترک جدید از هوومن و یانگ سادن</p>
+          </div>
+
+          <div class="viz" style="margin-top:12px">
+            <div class="canvas-wrap" style="position:relative">
+              <canvas id="viz"></canvas>
+              <div class="depth-layer" id="depthLayer"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+              <div class="small">ویژوالایزر پیشرفته</div>
+              <div class="row">
+                <label class="small">شدت</label>
+                <input id="sensitivity" type="range" min="1" max="6" step="0.1" value="3" />
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:12px;margin-top:12px;align-items:start">
+            <div>
+              <div class="small" style="margin-bottom:6px">متن آهنگ</div>
+              <div id="lyrics" class="lyrics-box">
+                <!-- اینجا متن را خودت پیست کن یا لینک منبع را قرار بده -->
+                <div class="line">برای اضافه کردن متن: متن را اینجا پیست کن یا روی "بارگیری از وب" کلیک کن تا لینک منبع باز شود.</div>
+              </div>
+              <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+                <button id="pasteLyrics" class="btn ghost">پیست متن اینجا</button>
+                <button id="openSource" class="btn ghost">بارگیری از وب</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="small" style="margin-bottom:6px">کنترل‌های پیشرفته</div>
+              <div style="padding:12px;border-radius:10px;background:rgba(255,255,255,0.01)">
+                <div class="small">Bass Boost <input id="bassBoost" type="checkbox" style="margin-right:6px" /></div>
+                <div style="height:8px"></div>
+                <div class="small">Gain <input id="gain" type="range" min="0.5" max="2.0" step="0.01" value="1.0" /></div>
+                <div style="height:8px"></div>
+                <div class="small">Reverb <input id="reverb" type="range" min="0" max="1" step="0.01" value="0.0" /></div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
+    </div>
+  </div>
 
-      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 360px;gap:14px;align-items:start">
-        <div>
-          <div class="small" style="margin-bottom:6px">متن آهنگ</div>
-          <div class="lyrics" id="lyrics">
-            <!-- متن نمونه؛ می‌توانی جایگزین کنی -->
-            <p>اینجا متن آهنگ را قرار بدهید. این بخش می‌تواند همگام با پخش هایلایت شود و اسکرول اتوماتیک داشته باشد.</p>
-            <p>بند اول...</p>
-            <p>بند دوم...</p>
-            <p>بند سوم...</p>
-          </div>
-        </div>
-
-        <div>
-          <div class="small" style="margin-bottom:6px">اکولایزر و افکت‌ها</div>
-          <div style="padding:12px;border-radius:10px;background:rgba(255,255,255,0.01)">
-            <div class="small">افکت بیس</div>
-            <label style="display:block;margin-top:6px">
-              <input id="bassBoost" type="checkbox" /> فعال‌سازی
-            </label>
-            <div style="height:10px"></div>
-            <div class="small">Reverb (نمونه)</div>
-            <input id="reverb" type="range" min="0" max="1" step="0.01" value="0.0" />
-            <div style="height:8px"></div>
-            <div class="small">Gain</div>
-            <input id="gain" type="range" min="0.2" max="2" step="0.01" value="1.0" />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ویژوالایزر سطر دوم (اختیاری) -->
-    <div style="grid-column:1/-1"></div>
-  </main>
-
-  <footer style="width:100%;max-width:1100px;text-align:center;color:var(--muted);margin-top:12px">
-    ساخته شده برای محمد — تجربهٔ شنیداری متفاوت
-  </footer>
-</div>
-
-<!-- المان‌های صوتی -->
-<audio id="player" preload="auto" crossorigin="anonymous" src="08.Hoomaan & Arown & Young Sudden - Jenaaze (128).mp3"></audio>
+  <audio id="player" crossorigin="anonymous" src="08.Hoomaan & Arown & Young Sudden - Jenaaze (128).mp3" preload="auto"></audio>
 
 <script>
-/* ============================================================
-   اسکریپت جامع: Web Audio API ، Canvas Visualizer ، Bass Shake
-   شامل: theme toggle, QR draw, share, playlist, lyrics scroll
-   ============================================================ */
+/* ============
+   آماده‌سازی Web Audio و ویژوالایزر
+   ============
+*/
+const player = document.getElementById('player');
+const playBtn = document.getElementById('playBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const viz = document.getElementById('viz');
+const ctx = viz.getContext('2d');
+const sensitivityEl = document.getElementById('sensitivity');
+const bassBoostEl = document.getElementById('bassBoost');
+const gainEl = document.getElementById('gain');
+const reverbEl = document.getElementById('reverb');
+const volLabel = document.getElementById('volLabel');
+const lyricsEl = document.getElementById('lyrics');
+const pasteLyricsBtn = document.getElementById('pasteLyrics');
+const openSourceBtn = document.getElementById('openSource');
+const cover = document.getElementById('cover');
+const coverRef = document.getElementById('coverRef');
+const titleEl = document.getElementById('title');
 
-/* کمک‌کننده‌ها */
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
+let audioCtx, analyser, source, gainNode, convolver;
+let dataArray, freqArray;
+let raf = null;
 
-/* المان‌های اصلی */
-const player = $('#player');
-const playBtn = $('#playBtn');
-const pauseBtn = $('#pauseBtn');
-const prevBtn = $('#prevBtn');
-const nextBtn = $('#nextBtn');
-const coverImg = $('#coverImg');
-const coverGhost = $('#coverGhost');
-const songTitle = $('#songTitle');
-const songDesc = $('#songDesc');
-const vizCanvas = $('#viz');
-const qrCanvas = $('#qrCanvas');
-const shareBtn = $('#shareBtn');
-const downloadBtn = $('#downloadBtn');
-const sensitivityEl = $('#sensitivity');
-const bassBoostEl = $('#bassBoost');
-const reverbEl = $('#reverb');
-const gainEl = $('#gain');
-const volLabel = $('#volLabel');
-
-let audioCtx, analyser, sourceNode, dataArray, freqArray, gainNode, reverbNode, convolverNode;
-
-/* playlist (در حال حاضر فقط یک ترک دارد؛ میتوان اضافه کرد) */
-const playlist = [
-  {title: 'جنازه', artist: 'هوومن · یانگ سادن', src: '08.Hoomaan & Arown & Young Sudden - Jenaaze (128).mp3', cover: 'images (2).jpeg'}
-];
-let currentIndex = 0;
-
-/* مقداردهی اولیه به صفحه */
-function loadTrack(i){
-  const t = playlist[i];
-  player.src = encodeURI(t.src);
-  coverImg.src = encodeURI(t.cover);
-  coverGhost.style.backgroundImage = `url('${encodeURI(t.cover)}')`;
-  songTitle.textContent = t.title;
-  songDesc.textContent = `${t.artist}`;
-}
-loadTrack(0);
-
-/* Canvas تنظیم */
-const ctx = vizCanvas.getContext('2d');
-function resizeCanvas(){
+/* تنظیم اندازه canvas برای DPR */
+function resize() {
   const dpr = Math.max(1, window.devicePixelRatio || 1);
-  const rect = vizCanvas.getBoundingClientRect();
-  vizCanvas.width = Math.round(rect.width * dpr);
-  vizCanvas.height = Math.round(rect.height * dpr);
+  const rect = viz.getBoundingClientRect();
+  viz.width = Math.round(rect.width * dpr);
+  viz.height = Math.round(rect.height * dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
 }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+window.addEventListener('resize', resize);
+resize();
 
-/* Web Audio API setup با افکت‌ها */
-function setupAudioNodes(){
+/* ساخت گراف صوتی */
+function setupAudio(){
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 2048;
   analyser.smoothingTimeConstant = 0.85;
 
   gainNode = audioCtx.createGain();
-  convolverNode = audioCtx.createConvolver(); // برای ریورب (اجرا می‌کنیم اگر نمونه صوتی داشتیم)
-  reverbNode = convolverNode;
+  convolver = audioCtx.createConvolver();
 
-  // Source
-  sourceNode = audioCtx.createMediaElementSource(player);
-
-  // chain: source -> gain -> analyser -> destination
-  sourceNode.connect(gainNode);
+  source = audioCtx.createMediaElementSource(player);
+  source.connect(gainNode);
   gainNode.connect(analyser);
   analyser.connect(audioCtx.destination);
 
-  // data buffers
   const bufferLength = analyser.frequencyBinCount;
   dataArray = new Uint8Array(bufferLength);
   freqArray = new Uint8Array(bufferLength);
 }
 
-/* draw visualizer: موج + bars + particle */
-let rafId;
+/* رسم ویژوالایزر پیشرفته */
 function draw(){
   if (!analyser) return;
-  rafId = requestAnimationFrame(draw);
-
+  raf = requestAnimationFrame(draw);
   analyser.getByteTimeDomainData(dataArray);
   analyser.getByteFrequencyData(freqArray);
 
-  const w = vizCanvas.clientWidth;
-  const h = vizCanvas.clientHeight;
+  const w = viz.clientWidth;
+  const h = viz.clientHeight;
   ctx.clearRect(0,0,w,h);
 
-  // background gradient
+  // بک‌گراند نرم
   const g = ctx.createLinearGradient(0,0,w,h);
-  g.addColorStop(0, 'rgba(10,12,14,0.45)');
-  g.addColorStop(1, 'rgba(10,12,14,0.15)');
+  g.addColorStop(0,'rgba(6,8,12,0.45)');
+  g.addColorStop(1,'rgba(6,8,12,0.1)');
   ctx.fillStyle = g;
   ctx.fillRect(0,0,w,h);
 
-  // time domain wave
-  ctx.lineWidth = 2.2;
-  ctx.strokeStyle = 'rgba(20,184,255,0.9)';
+  // موج زمان-دامنه
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(24,176,255,0.95)';
   ctx.beginPath();
   const slice = w / dataArray.length;
   let x = 0;
   for (let i=0;i<dataArray.length;i++){
-    const v = dataArray[i] / 128.0;
+    const v = dataArray[i]/128.0;
     const y = v * h/2;
-    if (i===0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+    if (i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
     x += slice;
   }
-  ctx.lineTo(w, h/2);
   ctx.stroke();
 
-  // frequency bars
+  // بارهای فرکانسی با گرادینت
   const barCount = Math.min(64, Math.floor(w/6));
   const gap = Math.max(2, Math.floor(w/(barCount*20)));
   const barW = (w - gap*(barCount-1)) / barCount;
   const grad = ctx.createLinearGradient(0,0,0,h);
-  grad.addColorStop(0, 'rgba(155,89,255,0.95)');
-  grad.addColorStop(0.5, 'rgba(20,184,255,0.9)');
-  grad.addColorStop(1, 'rgba(20,184,255,0.16)');
+  grad.addColorStop(0,'rgba(155,89,255,0.95)');
+  grad.addColorStop(0.5,'rgba(24,176,255,0.9)');
+  grad.addColorStop(1,'rgba(24,176,255,0.14)');
 
   for (let i=0;i<barCount;i++){
     const idx = Math.floor(i * freqArray.length / barCount);
@@ -430,238 +279,163 @@ function draw(){
     const bx = i * (barW + gap);
     const by = h - barH;
     ctx.fillStyle = grad;
-    ctx.fillRect(bx, by, barW, barH);
-    // top highlight
+    ctx.fillRect(bx,by,barW,barH);
     ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    ctx.fillRect(bx, by, barW, Math.min(6, barH));
+    ctx.fillRect(bx,by,barW, Math.min(6,barH));
   }
 
-  // center glow based on avg volume
-  let sum=0; for (let i=0;i<freqArray.length;i++) sum += freqArray[i];
-  const avg = sum / freqArray.length;
-  const r = Math.min(h, avg/255 * h * 1.4);
-  const centerGrad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, r);
-  centerGrad.addColorStop(0, 'rgba(155,89,255,0.12)');
-  centerGrad.addColorStop(1, 'rgba(20,184,255,0)');
+  // glow based on bass
+  const lowCount = Math.max(4, Math.floor(freqArray.length * 0.06));
+  let lowSum = 0;
+  for (let i=0;i<lowCount;i++) lowSum += freqArray[i];
+  const lowAvg = lowSum / lowCount;
+  const r = Math.min(h, (lowAvg/255) * h * 1.6);
+  const centerGrad = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,r);
+  centerGrad.addColorStop(0,'rgba(155,89,255,0.12)');
+  centerGrad.addColorStop(1,'rgba(24,176,255,0)');
   ctx.fillStyle = centerGrad;
   ctx.fillRect(0,0,w,h);
-
-  // particle dots reacting to low freq
-  const lowAvg = freqArray.slice(0, Math.floor(freqArray.length*0.08)).reduce((a,b)=>a+b,0) / (freqArray.length*0.08);
-  const particleCount = 10 + Math.floor(lowAvg/20);
-  for (let i=0;i<particleCount;i++){
-    const px = Math.random()*w;
-    const py = (Math.sin(i+performance.now()/600) * 0.5 + 0.5) * h;
-    const pr = Math.max(1, Math.random()*4 * (lowAvg/120));
-    ctx.beginPath();
-    ctx.fillStyle = `rgba(20,184,255, ${0.06 + Math.random()*0.12})`;
-    ctx.arc(px, py, pr, 0, Math.PI*2);
-    ctx.fill();
-  }
-
-  // subtle overlay lines
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.globalAlpha = 0.06;
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.beginPath();
-  ctx.moveTo(0, h*0.2); ctx.lineTo(w, h*0.8);
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = 'source-over';
 }
 
-/* لرزش (shake) المان‌ها بر اساس بیس */
-function startShake(){
+/* پالس نور روی کاور و دکمه به جای لرزش */
+let pulseAnim = null;
+function startPulse(){
   if (!analyser) return;
-  const elems = [document.body, coverImg, songTitle, ...$$('.btn')];
-  let last = 0;
+  const el = cover;
+  if (pulseAnim) cancelAnimationFrame(pulseAnim);
   function tick(){
     analyser.getByteFrequencyData(freqArray);
-    // تمرکز روی باند پایین (بیس)
-    const lowCount = Math.floor(freqArray.length * 0.06) || 4;
+    // تمرکز روی باند پایین
+    const lowCount = Math.max(4, Math.floor(freqArray.length * 0.06));
     let lowSum = 0;
     for (let i=0;i<lowCount;i++) lowSum += freqArray[i];
     const lowAvg = lowSum / lowCount;
-    const intensity = Math.min(1.6, (lowAvg / 120)); // 0..1.6
-
-    // scale و rotate و translate بر اساس intensity
-    const scale = 1 + intensity * 0.035;
-    const rotate = (intensity * 2.2) * (Math.random()*2-1);
-    const tx = (intensity * 6) * (Math.random()*2-1);
-    const ty = (intensity * 6) * (Math.random()*2-1);
-
-    elems.forEach(el=>{
-      if (!el) return;
-      el.style.transform = `translate(${tx}px, ${ty}px) rotate(${rotate}deg) scale(${scale})`;
-      // نور پالس
-      if (intensity>0.2) el.classList.add('pulse'); else el.classList.remove('pulse');
-    });
-
-    // کم شدن تدریجی برگردانده شدن
-    last = requestAnimationFrame(tick);
+    const intensity = Math.min(1.2, (lowAvg / 120)); // 0..1.2
+    const scale = 1 + intensity * 0.02;
+    const glow = 0.06 + intensity * 0.18;
+    el.style.transform = `scale(${scale}) translateZ(8px)`;
+    coverRef.style.opacity = glow;
+    // دکمه پخش نورانی شود
+    if (intensity > 0.12) playBtn.style.boxShadow = '0 20px 60px rgba(24,176,255,0.14)';
+    else playBtn.style.boxShadow = '0 12px 40px rgba(24,176,255,0.06)';
+    pulseAnim = requestAnimationFrame(tick);
   }
-  last = requestAnimationFrame(tick);
-  return () => cancelAnimationFrame(last);
+  pulseAnim = requestAnimationFrame(tick);
+}
+function stopPulse(){
+  if (pulseAnim) cancelAnimationFrame(pulseAnim);
+  cover.style.transform = '';
+  coverRef.style.opacity = '';
+  playBtn.style.boxShadow = '';
 }
 
-/* کنترل پخش */
-let cancelShake = null;
+/* کنترل پخش و اتصالات */
 playBtn.addEventListener('click', async ()=>{
   try{
-    if (!audioCtx) setupAudioNodes();
+    setupAudio();
     if (audioCtx.state === 'suspended') await audioCtx.resume();
     await player.play();
-    playBtn.style.display='none'; pauseBtn.style.display='inline-block';
-    draw(); // شروع ویژوالایزر
-    cancelShake = startShake();
-  }catch(e){
-    console.warn('play error', e);
-  }
+    playBtn.classList.add('hidden'); pauseBtn.classList.remove('hidden');
+    draw(); startPulse();
+  }catch(e){ console.warn('play failed', e) }
 });
 pauseBtn.addEventListener('click', ()=>{
   player.pause();
-  pauseBtn.style.display='none'; playBtn.style.display='inline-block';
-  if (cancelShake) { cancelShake(); cancelShake=null }
-  // بازنشانی transform
-  [document.body, coverImg, songTitle, ...$$('.btn')].forEach(el=>{ if (el) el.style.transform=''; el && el.classList.remove('pulse')});
+  pauseBtn.classList.add('hidden'); playBtn.classList.remove('hidden');
+  if (raf) cancelAnimationFrame(raf);
+  stopPulse();
 });
-
-/* playlist controls */
-function playIndex(i){
-  currentIndex = (i+playlist.length)%playlist.length;
-  loadTrack(currentIndex);
-  playBtn.click();
-}
-prevBtn.addEventListener('click', ()=>playIndex(currentIndex-1));
-nextBtn.addEventListener('click', ()=>playIndex(currentIndex+1));
 
 /* دانلود */
 downloadBtn.addEventListener('click', ()=>{
   const a = document.createElement('a');
-  a.href = encodeURI(playlist[currentIndex].src);
-  a.download = playlist[currentIndex].src.split('/').pop();
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  a.href = encodeURI(player.src);
+  a.download = player.src.split('/').pop();
+  document.body.appendChild(a); a.click(); a.remove();
 });
 
-/* share (لینک ساده به واتساپ و کپی) */
-shareBtn.addEventListener('click', async ()=>{
-  const url = location.href;
-  if (navigator.share){
-    try{ await navigator.share({title: playlist[currentIndex].title, text: playlist[currentIndex].artist, url}); } catch {}
-  } else {
-    // fallback: show prompt to copy
-    try{ await navigator.clipboard.writeText(url); alert('لینک کپی شد!'); } catch { prompt('این لینک را کپی کنید:', url) }
+/* تنظیمات صوتی ساده */
+gainEl.addEventListener('input', ()=>{ if (gainNode) gainNode.gain.value = parseFloat(gainEl.value); });
+bassBoostEl.addEventListener('change', ()=>{ if (!gainNode) return; if (bassBoostEl.checked) gainNode.gain.setValueAtTime(1.4,audioCtx.currentTime); else gainNode.gain.setValueAtTime(parseFloat(gainEl.value),audioCtx.currentTime);});
+
+/* راه‌اندازی nodes */
+function setupAudio(){
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 2048;
+  analyser.smoothingTimeConstant = 0.85;
+  gainNode = audioCtx.createGain();
+  source = audioCtx.createMediaElementSource(player);
+  source.connect(gainNode);
+  gainNode.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  const bufferLength = analyser.frequencyBinCount;
+  dataArray = new Uint8Array(bufferLength);
+  freqArray = new Uint8Array(bufferLength);
+}
+
+/* انطباق حجم چراغ بازتاب کاور با اندازه تصویر */
+function syncCoverRef(){
+  try{
+    const rect = cover.getBoundingClientRect();
+    coverRef.style.height = Math.max(40, rect.height * 0.16) + 'px';
+    coverRef.style.left = rect.left + 'px';
+    coverRef.style.width = rect.width + 'px';
+    coverRef.style.top = (rect.bottom - (rect.height * 0.08)) + 'px';
+    coverRef.style.backgroundImage = `url('${cover.src}')`;
+  }catch(e){}
+}
+window.addEventListener('resize', syncCoverRef);
+cover.addEventListener('load', syncCoverRef);
+setTimeout(syncCoverRef,800);
+
+/* بارگذاری اولیه */
+window.addEventListener('load', async ()=>{
+  resize();
+  try{
+    setupAudio();
+    // تلاش autoplay (ممکن است بلاک شود)
+    await player.play();
+    playBtn.classList.add('hidden'); pauseBtn.classList.remove('hidden');
+    draw(); startPulse();
+  }catch(e){
+    // اوتوپلی ممکن است نیاز به تعامل داشته باشد
+    console.log('autoplay blocked or user gesture required');
   }
-});
-
-/* sensitivity, gain, reverb */
-sensitivityEl.addEventListener('input', ()=>{/*شدت در draw خوانده می‌شود*/});
-gainEl.addEventListener('input', ()=>{
-  if (!gainNode) return;
-  gainNode.gain.value = parseFloat(gainEl.value);
-});
-bassBoostEl.addEventListener('change', ()=>{
-  // ساده: افزایش گین در باند پایین با فیلتر اضافه (پیاده‌سازی ساده)
-  if (!audioCtx) setupAudioNodes();
-  if (bassBoostEl.checked){
-    // یک فیلتر کم‌گذر مصنوعی اضافه می‌کنیم (همین‌جا ساده)
-    // برای سادگی از gain بالا استفاده می‌کنیم
-    gainNode.gain.setValueAtTime(1.4, audioCtx.currentTime);
-  } else {
-    gainNode.gain.setValueAtTime(parseFloat(gainEl.value), audioCtx.currentTime);
-  }
-});
-reverbEl.addEventListener('input', ()=>{
-  // placeholder: در صورت داشتن نمونه‌ی impulse می‌توانیم convolverNode.buffer = impulseBuffer;
-});
-
-/* وقتی ترک تمام می‌شود */
-player.addEventListener('ended', ()=>{
-  pauseBtn.style.display='none'; playBtn.style.display='inline-block';
-  if (cancelShake){ cancelShake(); cancelShake=null }
-});
-
-/* init: resize canvas و آماده‌سازی */
-window.addEventListener('load', ()=>{
-  resizeCanvas();
-  // رسم اولیه QR
-  drawQR();
-  // مقداردهی vol label
   volLabel.textContent = `${Math.round(player.volume*100)}%`;
 });
 
-/* ===========
-   QR ساده روی canvas
-   =========== */
-/* برای ساده بودن از الگوریتم تولید QR کوچک استفاده نمی‌کنیم؛
-   در عوض آدرس را به یک سرویس رایگان تبدیل می‌کنیم و آن را رسم می‌کنیم.
-   (در محیط آفلاین این بخش به تصویر fallback تبدیل می‌شود) */
-function drawQR(){
+/* paste lyrics: اجازه بده کاربر متن را پیست کند */
+pasteLyricsBtn.addEventListener('click', async ()=>{
   try{
-    const url = encodeURIComponent(location.href);
-    const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${url}&choe=UTF-8`;
-    const c = qrCanvas;
-    const ctxQr = c.getContext('2d');
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = ()=> { ctxQr.clearRect(0,0,c.width,c.height); ctxQr.drawImage(img,0,0,c.width,c.height); };
-    img.onerror = ()=> {
-      // fallback: رسم لوگو ساده
-      ctxQr.fillStyle = '#111'; ctxQr.fillRect(0,0,c.width,c.height);
-      ctxQr.fillStyle = '#fff'; ctxQr.font = '12px sans-serif'; ctxQr.fillText('QR', c.width/2-10, c.height/2+6);
-    };
-    img.src = qrUrl;
-  }catch(e){ console.warn('QR error', e); }
-}
-
-/* ===========
-   Lyrics scroll sync (ابتدایی)
-   =========== */
-// برای همگام‌سازی دقیق نیاز به فایل LRC داریم؛ این یک نمونهٔ ساده است:
-const lyricsEl = $('#lyrics');
-function autoScrollLyrics(){
-  // نمونه: اسکرول تدریجی با سرعت بر اساس currentTime
-  const duration = player.duration || 1;
-  const frac = player.currentTime / duration;
-  const maxScroll = lyricsEl.scrollHeight - lyricsEl.clientHeight;
-  lyricsEl.scrollTop = maxScroll * frac;
-}
-setInterval(()=>{ if (!player.paused) autoScrollLyrics(); }, 300);
-
-/* ===========
-   Theme toggle
-   =========== */
-const themeBtn = $('#themeBtn');
-themeBtn.addEventListener('click', ()=>{
-  document.documentElement.classList.toggle('light-mode');
-});
-
-/* ===========
-   واکنش به کلیدهای صفحه کلید (کنترل)
-   =========== */
-document.addEventListener('keydown', (e)=>{
-  if (e.code === 'Space'){ e.preventDefault(); if (player.paused) playBtn.click(); else pauseBtn.click(); }
-  if (e.code === 'ArrowRight') nextBtn.click();
-  if (e.code === 'ArrowLeft') prevBtn.click();
-});
-
-/* ===========
-   شروع: تلاش برای autoplay و در غیر این صورت انتظار تعامل
-   =========== */
-window.addEventListener('load', async ()=>{
-  try{
-    setupAudioNodes();
-    await player.play();
-    // اگر موفق بود، نمایش کنترل‌ها
-    playBtn.style.display='none'; pauseBtn.style.display='inline-block';
-    draw(); cancelShake = startShake();
+    const text = await navigator.clipboard.readText();
+    if (!text) return alert('متنی در کلیپ‌بورد یافت نشد. متن را کپی کن و دوباره امتحان کن.');
+    // ساده: هر خط را در یک div جدا می‌کنیم
+    lyricsEl.innerHTML = '';
+    text.split(/\r?\n/).forEach(ln=>{
+      const d = document.createElement('div'); d.className='line'; d.textContent = ln || ' '; lyricsEl.appendChild(d);
+    });
+    alert('متن جایگذاری شد. اگر متن کامل نیست، از منبع رسمی آن را دریافت کن.');
   }catch(e){
-    // autoplay مسدود شد؛ کاربر باید دکمه را لمس کند
-    console.log('autoplay blocked; user gesture needed');
+    alert('خطا در دسترسی به کلیپ‌بورد. متن را دستی درون کادر پیست کن.');
   }
 });
+
+/* open source: نشان دادن لینک‌های پیشنهادی برای مشاهده متن (منابع پیدا شده) */
+// منابع پیشنهادی: Mustext و Genius (باز کردن در تب جدید)
+openSourceBtn.addEventListener('click', ()=>{
+  // لینک‌ها را باز کن (در صورت نیاز یکی را انتخاب کن)
+  const choices = [
+    {name:'Mustext (متن)', url:'https://mustext.net/%D9%85%D8%AA%D9%86-%D8%A2%D9%87%D9%86%DA%AF-%D8%AC%D9%86%D8%A7%D8%B2%D9%87-%D9%87%D9%88%D9%85%D8%A7%D9%86-%D8%A2%D8%B1%D9%88%D9%86-%D9%88-%DB%8C%D8%A7%D9%86%DA%AF-%D8%B5%D8%A7%D062%AF%D9%86/'},
+    {name:'Genius (English/lyrics)', url:'https://genius.com/Arman-miladi-jenaaze-lyrics'}
+  ];
+  // باز کردن اولی در تب جدید
+  window.open(choices[0].url, '_blank');
+});
+
+/* جلوگیری از transform پیش‌فرض در مرورگر موبایل روی tap */
+document.body.addEventListener('touchstart', ()=>{}, {passive:true});
 </script>
 </body>
 </html>
